@@ -343,7 +343,20 @@ uint16_t Adafruit_TSL2591::getLuminosity(uint8_t channel) {
     return (x >> 16);
   } else if (channel == TSL2591_VISIBLE) {
     // Reads all and subtracts out just the visible!
-    return ((x & 0xFFFF) - (x >> 16));
+
+    // cod3monk3y patch >> 
+    //return ((x & 0xFFFF) - (x >> 16));
+    uint16_t full = x & 0xFFFF;
+    uint16_t ir = x >> 16;
+    if (full > ir) {
+      return full-ir;
+    }
+    else {
+      // IR is greater than full, which would give a negative result.
+      // To prevent uint negative values, clamp to zero.
+      return 0;
+    }
+    // << cod3monk3y
   }
 
   // unknown channel!
